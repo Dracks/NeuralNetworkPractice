@@ -108,9 +108,15 @@ int main(int argc, char** argv) {
 	for (i=0; i<data.size(); i++){
 		for (j=0; j<data[i].size(); j++){
 			//cout << i << '-' << j << ':' << data[i][j] << " ";
-			cout << normalizeList[j]->normalize(data[i][j]) << " ";
+			float test=normalizeList[j]->normalize(data[i][j]);
+			if (test<0.1f){
+				cout << i << "-" << j << ':' << "Error value (" << test << ")" << endl;
+			}
+			if (test>0.9f){
+				cout << i << "-" << j << ':' << "Error value (" << test << ")" << endl;
+			}
 		}
-		cout << endl;
+		//cout << endl;
 	}//*/
 	
 	return 0;
