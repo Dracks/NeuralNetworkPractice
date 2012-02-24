@@ -29,14 +29,14 @@ vector<vector<float> > loadFile(char* fileName){
 			getline(ifs, line);
 			//cou << ifs.flags() << endl;
 			istringstream iss(line);
-			cout << line << endl;
+			//cout << line << endl;
 			bool endOfLine=false;
 			//istream tst;
 			//row.clear();
 			
 			while (!endOfLine){
 				if (!(iss >> value).fail()){
-					cout << "Value:" << value << endl;
+					//cout << "Value:" << value << endl;
 					row.push_back(value);
 				} else {
 					char c;
@@ -101,6 +101,9 @@ vector<Normalize*> obtainNormalizations(vector<vector<float> > data){
 int main(int argc, char** argv) {
 	//char* name=;
 	vector<vector< float> > data=loadFile("turbine.txt");
+	
+	assert(data.size()>0);
+	assert(data[0].size())>0;
 	
 	vector<Normalize*> normalizeList=obtainNormalizations(data);
 	cout << "debug:" << endl;
