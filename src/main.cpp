@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -103,7 +104,7 @@ int main(int argc, char** argv) {
 	vector<vector< float> > data=loadFile("turbine.txt");
 	
 	assert(data.size()>0);
-	assert(data[0].size())>0;
+	assert(data[0].size()>0);
 	
 	vector<Normalize*> normalizeList=obtainNormalizations(data);
 	cout << "debug:" << endl;
