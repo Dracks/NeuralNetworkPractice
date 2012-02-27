@@ -7,11 +7,13 @@
 
 #include <vector>
 #include <fstream>
-#include "Normalize.h"
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <assert.h>
+
+#include "Normalize.h"
+#include "MultiLayerNN.h"
 
 using namespace std;
 
@@ -109,7 +111,7 @@ int main(int argc, char** argv) {
 	vector<Normalize*> normalizeList=obtainNormalizations(data);
 	cout << "debug:" << endl;
 	int i,j;
-	for (i=0; i<data.size(); i++){
+	/*for (i=0; i<data.size(); i++){
 		for (j=0; j<data[i].size(); j++){
 			//cout << i << '-' << j << ':' << data[i][j] << " ";
 			float test=normalizeList[j]->normalize(data[i][j]);
@@ -122,6 +124,21 @@ int main(int argc, char** argv) {
 		}
 		//cout << endl;
 	}//*/
+	
+	vector<int> layers;
+	layers.push_back(1);
+	layers.push_back(3);
+	layers.push_back(1);
+	
+	MultiLayerNN* NN=new MultiLayerNN(layers);
+	
+	vector<float> test;
+	test.push_back(0.5f);
+	test=NN->predict(test);
+	
+	for (i=0; i<test.size(); i++){
+		cout << i << ':' << test[i] << endl;
+	}
 	
 	return 0;
 }

@@ -11,7 +11,8 @@
 
 class Normalize{
 private:
-	float minimum, diference;
+	float minimum;
+	float diference;
 public:
 	Normalize(float min, float max, float margin=0.1f);
 	virtual ~Normalize();

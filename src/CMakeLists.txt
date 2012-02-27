@@ -1,2 +1,2 @@
-add_executable(p1 main.cpp Normalize.cpp)
+add_executable(p1 main.cpp Normalize.cpp MultiLayerNN.cpp)
 
