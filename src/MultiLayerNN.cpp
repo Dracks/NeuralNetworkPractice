@@ -3,6 +3,7 @@
 #include "Math.h"
 #include <assert.h>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -37,7 +38,7 @@ std::vector<float> MultiLayerNN::predict(std::vector<float> input){
 	vector<float> output;
 	assert(input.size()==layers[1]);
 	for (int i=0; i<input.size(); i++){
-		cout <<"predict" << i << ":" << input[i] << endl;
+		//cout <<"predict" << i << ":" << input[i] << endl;
 		values[i]=input[i];
 	}
 	
@@ -62,7 +63,7 @@ std::vector<float> MultiLayerNN::predict(std::vector<float> input){
 	return output;
 }
 	
-void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std::vector<float> > output, int crossValidation){
+void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std::vector<float> > output, int epochNumber,int crossValidation){
 	
 	int numLayers=layers.size();
 	int numNeurons=layers[numLayers-1];
@@ -71,10 +72,15 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 	int i,j,z;
 	
 	vector<float> delta(numNeurons,0.0f);
+	vector<float> deltaOld(numNeurons,0.0f);
 	//vector<float> odiference(numNeurons,0.0f);
 	//vector<float> output;
 	
 	std::map<int, std::map<int, float> > wdiference;
+	std::map<int, std::map<int, float> > wdiferenceOld;
+	
+	ofstream csvResultsErrors;
+	csvResultsErrors.open("errorsResults.csv", ios::out);
 	
 	for (i=1; i<numLayers-1; i++){
 		ini=layers[i-1];
@@ -83,13 +89,14 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 		for (int j=ini; j<change; j++){
 			for (int z=change; z<end; z++){
 				wdiference[z][j]=0.0f;
+				wdiferenceOld[z][j]=0.0f;
 			}
 		}
 	}
 	
 	int dataLarge=input.size()-crossValidation;
-	for (int loop=0; loop<100; loop++){
-		for (int loopPattern=0; loopPattern<dataLarge; loopPattern++){
+	for (int epoch=0; epoch<epochNumber; epoch++){
+		for (int loop=0; loop<dataLarge; loop++){
 			int rowData=rand()%dataLarge;
 			cout << rowData << " & " << dataLarge << endl;
 			
@@ -126,7 +133,9 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 				end=layers[z+1];
 				for (j=ini; j<change; j++){
 					for (i=change; i<end; i++){
-						wdiference[i][j]=-delta[i]*values[j];
+						//wdiference[i][j]=-delta[i]*values[j]*(1-epoch/(epochNumber*2.0f))+wdiferenceOld[i][j]*(epoch/(epochNumber*5.0f));
+						wdiference[i][j]=-delta[i]*values[j]*0.3f+wdiferenceOld[i][j]*0.3f;
+						wdiferenceOld[i][j]=wdiference[i][j];
 					}
 				}
 			}
@@ -137,7 +146,7 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 				while (jt!=it->second.end()){
 					//cout << it->first << "-"<< jt->first<< endl;
 					//cout << "weights["<< it->first <<"]["<< jt->first <<"]: " << weights[it->first][jt->first] << "+" << jt->second << endl;
-					weights[it->first][jt->first]+=0.2f*jt->second;
+					weights[it->first][jt->first]+=jt->second;
 					jt++;
 				}
 				it++;
@@ -145,8 +154,34 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 			
 			for (i=0; i<ovalue.size(); i++){
 				//cout << "oval" << ovalue[i] << " & " << delta[i] << endl;
-				ovalue[i]+=0.2f*delta[i];
+				//delta[i]=delta[i]*(1-epoch/(epochNumber*2.0f))+deltaOld[i]*(epoch/(epochNumber*5.0f));
+				delta[i]=delta[i]*0.3f+deltaOld[i]*0.3f;
+				ovalue[i]+=delta[i];
+				deltaOld[i]=delta[i];
 			}
+			
+			csvResultsErrors<< epoch << ";" << loop << ";";
+			double errorAcumulation=0.0f;
+			for (j=0; j<dataLarge; j++){
+				double cubeError=0.0f;
+				result=this->predict(input[j]);
+				for (i=0; i<result.size(); i++){
+					cubeError+=(result[i]-output[j][i])*(result[i]-output[j][i]);
+				}
+				errorAcumulation+=cubeError;
+			}
+			csvResultsErrors << errorAcumulation/dataLarge << ";";
+			
+			for (j=dataLarge; j<input.size(); j++){
+				double cubeError=0.0f;
+				result=this->predict(input[j]);
+				for (i=0; i<result.size(); i++){
+					cubeError+=(result[i]-output[j][i])*(result[i]-output[j][i]);
+				}
+				errorAcumulation+=cubeError;
+			}
+			csvResultsErrors <<errorAcumulation/(input.size()-dataLarge) << ";"<< endl;
+			
 		}
 	}
 }

@@ -23,7 +23,7 @@ public:
 	
 	std::vector<float> predict(std::vector<float>);
 	
-	void learn(std::vector<std::vector<float> > inputs, std::vector<std::vector<float> > inputs, int crossValidation);
+	void learn(std::vector<std::vector<float> > inputs, std::vector<std::vector<float> > inputs,int epoch=100, int crossValidation=0);
 	
 	float function(float value);//*/
 	

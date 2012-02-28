@@ -126,7 +126,7 @@ vector<vector<float> > yequalsx(){
 			ret[i+j*5][0]=i;
 			ret[i+j*5][1]=j;
 			ret[i+j*5][2]=((float)i+((float)j*j));
-			cout << ret[i][0] << "-" << ret[i][1] << ":" << ret[i][2] <<endl;
+			cout << ret[i+j*5][0] << "-" << ret[i+j*5][1] << ":" << ret[i+j*5][2] <<endl;
 		}
 	}
 	
@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
 	
 	MultiLayerNN* NN=new MultiLayerNN(layers);
 	
-	NN->learn(splitedData.first, splitedData.second,0);
+	NN->learn(splitedData.first, splitedData.second,10000, 5);
 	
 	vector<float> test(2,normalizeList[0]->normalize(2.5f));
 	print(NN->predict(test), normalizeList, 2);
