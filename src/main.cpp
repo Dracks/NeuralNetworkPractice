@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iostream>
 #include <assert.h>
+#include <math.h>
 
 #include "Normalize.h"
 #include "MultiLayerNN.h"
@@ -156,11 +157,16 @@ int main(int argc, char** argv) {
 	assert(data[0].size()>0);
 	
 	vector<Normalize*> normalizeList=obtainNormalizations(data);//*/
-	vector<vector< float> > data=yequalsx();
+	
+	if (argc!=3){
+		cout << "Usage :" << argv[0] << " file.txt outputs.txt" << endl;
+		exit(-1);
+	}
+	vector<vector< float> > data=loadFile(argv[1]);
 	
 	vector<Normalize*> normalizeList=obtainNormalizations(data);
 	
-	cout << "debug:" << endl;
+	//cout << "debug:" << endl;
 	int i,j;
 	for (i=0; i<data.size(); i++){
 		for (j=0; j<data[i].size(); j++){
@@ -176,24 +182,44 @@ int main(int argc, char** argv) {
 		//cout << endl;
 	}//*/
 	
-	pair<vector<vector<float> >, vector<vector<float> > > splitedData=
-	splitData(data, 2);
+	pair<vector<vector<float> >, vector<vector<float> > > splitedData= splitData(data, 4);
 	
 	vector<int> layers;
-	layers.push_back(2);
-	layers.push_back(3);
+	layers.push_back(4);
+	layers.push_back(5);
 	layers.push_back(1);
 	
 	MultiLayerNN* NN=new MultiLayerNN(layers);
 	
-	NN->learn(splitedData.first, splitedData.second,10000, 5);
-	
-	vector<float> test(2,normalizeList[0]->normalize(2.5f));
-	print(NN->predict(test), normalizeList, 2);
+	//NN->learn(splitedData.first, splitedData.second,20000, 50);
+	NN->learn(splitedData.first, splitedData.second,5000, 0);
 	
 	
-	test[0]=normalizeList[0]->normalize(1.0f);
-	print(NN->predict(test), normalizeList, 2);
+	data=loadFile(argv[2]);
+	
+	assert(data.size()!=0);
+	//vector<Normalize*> normalizeList=obtainNormalizations(data);
+	//int i,j;
+	for (i=0; i<data.size(); i++){
+		for (j=0; j<data[i].size(); j++){
+			data[i][j]=normalizeList[j]->normalize(data[i][j]);
+		}
+	}
+	splitedData=splitData(data,4);
+	double diferenceSum=0.0f;
+	double total=0.0f;
+	for (i=0; i<data.size(); i++){
+		vector<float> result=NN->predict(splitedData.first[i]);
+		cout << "ed;" << normalizeList[4]->restore(result[0]) << endl;
+		assert(splitedData.second[i].size()==1);
+		assert(result.size()==1);
+		diferenceSum+=fabs(normalizeList[4]->restore(result[0])-normalizeList[4]->restore(splitedData.second[i][0]));
+		total+=normalizeList[4]->restore(splitedData.second[i][0]);
+		//cout << "ED:" << diferenceSum << "-" << total << endl;
+	}
+	
+	cout << "Error:" << 100.0f*diferenceSum/total << endl;
+	
 	
 	return 0;
 }

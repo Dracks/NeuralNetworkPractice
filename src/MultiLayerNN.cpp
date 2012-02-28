@@ -19,7 +19,7 @@ MultiLayerNN::MultiLayerNN(std::vector< int > layersCount){
 	int size=layers[layers.size()-1];
 	for (int i=0; i<size; i++){
 		values.push_back(0.0f);
-		ovalue.push_back(0.5f);
+		ovalue.push_back((float)rand()/(float)RAND_MAX);
 	}//*/
 	
 	for (int i=1; i<layers.size()-1; i++){
@@ -28,7 +28,7 @@ MultiLayerNN::MultiLayerNN(std::vector< int > layersCount){
 		int end=layers[i+1];
 		for (int j=ini; j<change; j++){
 			for (int z=change; z<end; z++){
-				weights[z][j]=0.5f;
+				weights[z][j]=(float)rand()/(float)RAND_MAX;
 			}
 		}
 	}
@@ -79,6 +79,8 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 	std::map<int, std::map<int, float> > wdiference;
 	std::map<int, std::map<int, float> > wdiferenceOld;
 	
+	vector<float> result;
+	
 	ofstream csvResultsErrors;
 	csvResultsErrors.open("errorsResults.csv", ios::out);
 	
@@ -94,13 +96,18 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 		}
 	}
 	
+	vector<double> trainingErrors;
+	vector<double> testErrors;
+	
+	bool stepover=false;
+	
 	int dataLarge=input.size()-crossValidation;
 	for (int epoch=0; epoch<epochNumber; epoch++){
 		for (int loop=0; loop<dataLarge; loop++){
 			int rowData=rand()%dataLarge;
-			cout << rowData << " & " << dataLarge << endl;
+			//cout << rowData << " & " << dataLarge << endl;
 			
-			vector<float> result=this->predict(input[rowData]);
+			result=this->predict(input[rowData]);
 			
 			int offset=layers[numLayers-2];
 			for (i=0; i<output[0].size(); i++){
@@ -159,8 +166,9 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 				ovalue[i]+=delta[i];
 				deltaOld[i]=delta[i];
 			}
-			
-			csvResultsErrors<< epoch << ";" << loop << ";";
+		}/*
+		if (epoch>200){
+			csvResultsErrors<< epoch << ";" ;
 			double errorAcumulation=0.0f;
 			for (j=0; j<dataLarge; j++){
 				double cubeError=0.0f;
@@ -172,6 +180,10 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 			}
 			csvResultsErrors << errorAcumulation/dataLarge << ";";
 			
+			
+			//trainingErrors.push_back(errorAcumulation);
+			//cout << "E:" << errorAcumulation ;
+			errorAcumulation=0.0f;
 			for (j=dataLarge; j<input.size(); j++){
 				double cubeError=0.0f;
 				result=this->predict(input[j]);
@@ -180,9 +192,29 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 				}
 				errorAcumulation+=cubeError;
 			}
+			//testErrors.push_back(errorAcumulation);
+			//cout << " -> " << errorAcumulation << endl;
 			csvResultsErrors <<errorAcumulation/(input.size()-dataLarge) << ";"<< endl;
-			
+		}*/
+		
+		/*if (!stepover && trainingErrors.size()>5){
+			double added=0.0f;
+			for (i=1; i<testErrors.size(); i++){
+				added+=testErrors[i-1]-testErrors[i];
+			}
+			if (added>0.0f){
+				stepover=true;
+			}
 		}
+		if (trainingErrors.size()>20 && stepover){
+			double trainingProc=0.0f;
+			double testProc=0.0f;
+			for (i=trainingErrors.size()-20; i<trainingErrors.size(); i++){
+				trainingProc+=trainingErrors[i-1]-trainingErrors[i];
+				testProc+=testErrors[i-1]-testErrors[i];
+			}
+			//cout << "Training limits["<< epoch << "]: " << trainingProc << " vs " << testProc << endl;
+		}//*/
 	}
 }
 	
