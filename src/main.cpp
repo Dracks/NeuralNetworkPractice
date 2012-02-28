@@ -98,47 +98,102 @@ vector<Normalize*> obtainNormalizations(vector<vector<float> > data){
 	return ret;
 }
 
+pair<vector<vector<float> >, vector<vector<float> > > splitData(vector<vector<float> > data, int inputNumber){
+	vector<vector<float> > input(data.size(),vector<float>(0));
+	vector<vector<float> > output(data.size(),vector<float>(0));
+	
+	for (int i=0; i<data.size(); i++){
+		int j=0;
+		assert(data[i].size()>inputNumber);
+		for (;j<inputNumber; j++){
+			input[i].push_back(data[i][j]);
+		}
+		
+		for (;j<data[i].size(); j++){
+			output[i].push_back(data[i][j]);
+		}
+	}
+	
+	return pair<vector<vector<float> >, vector<vector<float> > >(input, output);
+	
+}
+
+vector<vector<float> > yequalsx(){
+	vector<vector<float> > ret(25, vector<float>(3));
+	
+	for (int i=0; i<5; i++){
+		for (int j=0; j<5; j++){
+			ret[i+j*5][0]=i;
+			ret[i+j*5][1]=j;
+			ret[i+j*5][2]=((float)i+((float)j*j));
+			cout << ret[i][0] << "-" << ret[i][1] << ":" << ret[i][2] <<endl;
+		}
+	}
+	
+	return ret;
+}
+
+void print(vector<float> data, vector<Normalize*> n, int offset){
+	for (int i=0; i<data.size(); i++){
+		cout << "Resultat["<<  i << "]:" << n[offset+i]->restore(data[i]) << endl;
+	}
+}
+
+void print(vector<float> data){
+	for (int i=0; i<data.size(); i++){
+		cout << "Resultat["<<  i << "]:" << data[i] << endl;
+	}
+}
+
 /*
  * 
  */
 int main(int argc, char** argv) {
 	//char* name=;
-	vector<vector< float> > data=loadFile("turbine.txt");
+	/*vector<vector< float> > data=loadFile("turbine.txt");
 	
 	assert(data.size()>0);
 	assert(data[0].size()>0);
 	
+	vector<Normalize*> normalizeList=obtainNormalizations(data);//*/
+	vector<vector< float> > data=yequalsx();
+	
 	vector<Normalize*> normalizeList=obtainNormalizations(data);
+	
 	cout << "debug:" << endl;
 	int i,j;
-	/*for (i=0; i<data.size(); i++){
+	for (i=0; i<data.size(); i++){
 		for (j=0; j<data[i].size(); j++){
 			//cout << i << '-' << j << ':' << data[i][j] << " ";
-			float test=normalizeList[j]->normalize(data[i][j]);
-			if (test<0.1f){
+			data[i][j]=normalizeList[j]->normalize(data[i][j]);
+			/*if (test<0.1f){
 				cout << i << "-" << j << ':' << "Error value (" << test << ")" << endl;
 			}
 			if (test>0.9f){
 				cout << i << "-" << j << ':' << "Error value (" << test << ")" << endl;
-			}
+			}//*/
 		}
 		//cout << endl;
 	}//*/
 	
+	pair<vector<vector<float> >, vector<vector<float> > > splitedData=
+	splitData(data, 2);
+	
 	vector<int> layers;
-	layers.push_back(1);
+	layers.push_back(2);
 	layers.push_back(3);
 	layers.push_back(1);
 	
 	MultiLayerNN* NN=new MultiLayerNN(layers);
 	
-	vector<float> test;
-	test.push_back(0.5f);
-	test=NN->predict(test);
+	NN->learn(splitedData.first, splitedData.second,0);
 	
-	for (i=0; i<test.size(); i++){
-		cout << i << ':' << test[i] << endl;
-	}
+	vector<float> test(2,normalizeList[0]->normalize(2.5f));
+	print(NN->predict(test), normalizeList, 2);
+	
+	
+	test[0]=normalizeList[0]->normalize(1.0f);
+	print(NN->predict(test), normalizeList, 2);
 	
 	return 0;
 }

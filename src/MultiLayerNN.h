@@ -17,12 +17,13 @@ private:
 	std::vector< float> values;
 	std::vector< float> ovalue;
 	std::map<int, std::map<int, float> > weights;//*/
+	
 public:
 	MultiLayerNN(std::vector< int > layers);
 	
 	std::vector<float> predict(std::vector<float>);
 	
-	void learn(std::vector<std::vector<float> > inputs, std::vector<std::vector<float> > outputs, int crossValidation);
+	void learn(std::vector<std::vector<float> > inputs, std::vector<std::vector<float> > inputs, int crossValidation);
 	
 	float function(float value);//*/
 	
