@@ -5,7 +5,14 @@
 #include <iostream>
 #include <fstream>
 
+#define kRandValue (0.4f)
+#define kRandValueOld (0.3f)
+
 using namespace std;
+
+float randf(){
+	return (float)rand()/(float)RAND_MAX;
+}
 
 //class MultiLayerNN{
 MultiLayerNN::MultiLayerNN(std::vector< int > layersCount){
@@ -19,7 +26,7 @@ MultiLayerNN::MultiLayerNN(std::vector< int > layersCount){
 	int size=layers[layers.size()-1];
 	for (int i=0; i<size; i++){
 		values.push_back(0.0f);
-		ovalue.push_back((float)rand()/(float)RAND_MAX);
+		ovalue.push_back(randf());
 	}//*/
 	
 	for (int i=1; i<layers.size()-1; i++){
@@ -28,7 +35,7 @@ MultiLayerNN::MultiLayerNN(std::vector< int > layersCount){
 		int end=layers[i+1];
 		for (int j=ini; j<change; j++){
 			for (int z=change; z<end; z++){
-				weights[z][j]=(float)rand()/(float)RAND_MAX;
+				weights[z][j]=randf();
 			}
 		}
 	}
@@ -141,7 +148,7 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 				for (j=ini; j<change; j++){
 					for (i=change; i<end; i++){
 						//wdiference[i][j]=-delta[i]*values[j]*(1-epoch/(epochNumber*2.0f))+wdiferenceOld[i][j]*(epoch/(epochNumber*5.0f));
-						wdiference[i][j]=-delta[i]*values[j]*0.3f+wdiferenceOld[i][j]*0.3f;
+						wdiference[i][j]=-delta[i]*values[j]*kRandValue+wdiferenceOld[i][j]*kRandValueOld;
 						wdiferenceOld[i][j]=wdiference[i][j];
 					}
 				}
@@ -162,11 +169,11 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 			for (i=0; i<ovalue.size(); i++){
 				//cout << "oval" << ovalue[i] << " & " << delta[i] << endl;
 				//delta[i]=delta[i]*(1-epoch/(epochNumber*2.0f))+deltaOld[i]*(epoch/(epochNumber*5.0f));
-				delta[i]=delta[i]*0.3f+deltaOld[i]*0.3f;
+				delta[i]=delta[i]*kRandValue+deltaOld[i]*kRandValueOld;
 				ovalue[i]+=delta[i];
 				deltaOld[i]=delta[i];
 			}
-		}/*
+		}
 		if (epoch>200){
 			csvResultsErrors<< epoch << ";" ;
 			double errorAcumulation=0.0f;
@@ -195,7 +202,7 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 			//testErrors.push_back(errorAcumulation);
 			//cout << " -> " << errorAcumulation << endl;
 			csvResultsErrors <<errorAcumulation/(input.size()-dataLarge) << ";"<< endl;
-		}*/
+		}//*/
 		
 		/*if (!stepover && trainingErrors.size()>5){
 			double added=0.0f;
