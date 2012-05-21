@@ -20,14 +20,16 @@ private:
 	
 public:
 	MultiLayerNN(std::vector< int > layers);
+	MultiLayerNN(std::string file);
 	
 	std::vector<float> predict(std::vector<float>);
 	
-	void learn(std::vector<std::vector<float> > inputs, std::vector<std::vector<float> > inputs,int epoch=100, int crossValidation=0);
+	void learn(std::vector<std::vector<float> > inputs, std::vector<std::vector<float> > inputs,int epoch=100, int crossValidation=0, float learnRate=0.1f, float momentum=0.4f);
 	
 	float function(float value);//*/
 	
 	void debug();
+	void dumpFile(std::string name);
 };
 
 #endif	/* BACKPROPAGATION_H */
