@@ -13,6 +13,7 @@
 
 class MultiLayerNN {
 private:
+	int epochCounter;
 	std::vector<int> layers;
 	std::vector< float> values;
 	std::vector< float> ovalue;
@@ -21,6 +22,8 @@ private:
 public:
 	MultiLayerNN(std::vector< int > layers);
 	MultiLayerNN(std::string file);
+	
+	int getInput();
 	
 	std::vector<float> predict(std::vector<float>);
 	

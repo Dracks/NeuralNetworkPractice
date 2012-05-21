@@ -20,8 +20,9 @@
 
 using namespace std;
 
-vector<vector<float> > loadFile(char* fileName){
-	ifstream ifs(fileName, ifstream::in);
+vector<vector<float> > loadFile(string fileName){
+	cout << fileName << endl;
+	ifstream ifs(fileName.c_str(), ifstream::in);
 	
 	float value;
 	int lineNumber, column;
@@ -146,4 +147,27 @@ void print(vector<float> data){
 	for (int i=0; i<data.size(); i++){
 		cout << "Resultat["<<  i << "]:" << data[i] << endl;
 	}
+}
+
+std::string getPrefix(int epoch, int overTraining, float learnRate, float momentum){
+	ostringstream ret("data_");
+	ret << epoch << "_" << overTraining << "_" << learnRate << "_" << momentum;
+	return ret.str();
+}
+
+std::vector<std::string> tokenize(std::string s, std::string delimeters){
+	vector<std::string> ret;
+	
+	char* c_str=new char [s.size()+1];
+	strcpy (c_str, s.c_str());
+	
+	char* pch = strtok (c_str,delimeters.c_str());
+	while (pch != NULL)
+	{
+		ret.push_back(string(pch));
+		pch = strtok (NULL, delimeters.c_str());
+	}
+	delete c_str;
+	return ret;
+	
 }

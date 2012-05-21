@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "Utils.h"
+
 //#define kRandValue (0.1f+ 0.15f*randf())
 //#define kRandValueOld (0.1f+0.4*randf())
 //#define kRandValue (0.18f)
@@ -24,6 +26,7 @@ float randf(){
 MultiLayerNN::MultiLayerNN(std::vector< int > layersCount){
 	int i, acumulator;
 	acumulator=0;
+	epochCounter=0;
 	layers.push_back(acumulator);
 	for (i=0; i<layersCount.size(); i++){
 		acumulator+=layersCount[i];
@@ -65,7 +68,10 @@ MultiLayerNN::MultiLayerNN(std::string name){
 		float tmpFloat;
 		char separator;
 		iss >> size >> separator;
-		cout << "Restoring size:" << size << endl;
+		iss >> tmpInt >> separator;
+		cout << "Restoring size: " << size << " epochs: " << tmpInt << endl;
+		
+		epochCounter=tmpInt;
 		
 		for (i=0; i<size; i++){
 			iss >> tmpInt >> separator;
@@ -123,9 +129,14 @@ MultiLayerNN::MultiLayerNN(std::string name){
 		file.close();
 	}
 }
+
+int MultiLayerNN::getInput(){
+	return layers[1];
+}
 	
 std::vector<float> MultiLayerNN::predict(std::vector<float> input){
 	vector<float> output;
+	//cout << "Debug " << input.size() << " " << layers[1] << endl;
 	assert(input.size()==layers[1]);
 	//cout <<"predict";
 	for (int i=0; i<input.size(); i++){
@@ -161,6 +172,11 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 	
 	int numLayers=layers.size();
 	int numNeurons=layers[numLayers-1];
+	string prefix=getPrefix(epochCounter+epochNumber, crossValidation, learnRate, momentum);
+	//cout << "Merda " << input.size() << " Merda2 " << layers[1] << endl;
+	assert(input.size()>0);
+	assert(input[0].size()==layers[1]);
+	assert(output[0].size()==(numNeurons-layers[numLayers-2]));
 	
 	int ini,change,end;
 	int i,j,z;
@@ -177,7 +193,7 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 	
 	ofstream csvResultsErrors;
 	//ofstream debugFile;
-	csvResultsErrors.open("errorsResults.csv", ios::out);
+	csvResultsErrors.open((prefix+"trainingErrors.csv").c_str(), ios::out);
 	
 	for (i=1; i<numLayers-1; i++){
 		ini=layers[i-1];
@@ -262,7 +278,7 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 				deltaOld[i]=delta[i];
 			}
 		}
-		if (epoch%100==0){
+		if (epoch%50==0){
 			csvResultsErrors<< epoch << ";" ;
 			
 			int errorCount=0;
@@ -348,6 +364,7 @@ void MultiLayerNN::learn(std::vector<std::vector<float> > input, std::vector<std
 			//cout << "Training limits["<< epoch << "]: " << trainingProc << " vs " << testProc << endl;
 		}//*/
 	}
+	epochCounter+=epochNumber;
 }
 	
 float MultiLayerNN::function(float value){
@@ -364,7 +381,7 @@ void MultiLayerNN::debug(){
 void MultiLayerNN::dumpFile(std::string name){
 	ofstream output;
 	output.open(name.c_str(), ios::out);
-	output << layers.size() << ";";
+	output << layers.size() << ";" << epochCounter << ";" ;
 	int i;
 	int j,z;
 	for (i=0; i<layers.size(); i++){
