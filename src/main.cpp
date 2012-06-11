@@ -30,6 +30,7 @@ typedef struct typeInputData{
 	bool dump;
 	bool predict;
 	bool write;
+	bool normalize;
 	
 	string newDessin;
 	string restoreFile;
@@ -46,7 +47,7 @@ typedef struct typeInputData{
 
 int main(int argc, char** argv) {
 	
-	typeInputData inputData={false,false,false,false,false, false, "", "", "", "", "", "", 0,0,0,0};
+	typeInputData inputData={false,false,false,false,false, false, false, "", "", "", "", "", "", 0,0,0,0};
 	
 	
 	char errflg=0;
@@ -55,7 +56,7 @@ int main(int argc, char** argv) {
 	char c;
 	
 	
-	while ((c = getopt(argc, argv, ":N:R:L:D:P:W:e:o:m:l:")) != -1) {
+	while ((c = getopt(argc, argv, ":N:R:L:D:P:W:e:o:m:l:n")) != -1) {
 		cout << "Debug:" << c ;
 		if (optarg!=NULL){
 			cout << "->" << optarg;
@@ -99,6 +100,8 @@ int main(int argc, char** argv) {
 				inputData.write=true;
 				inputData.writeFile=optarg;
 				break;
+			case 'n':
+				inputData.normalize=true;
             case ':':
 				fprintf(stderr,
 						"Option -%c requires an operand\n", optopt);
@@ -157,6 +160,18 @@ int main(int argc, char** argv) {
 	
 	if (inputData.learn){
 		vector<vector< float> > data=loadFile(inputData.learnFile);	
+		
+		if (inputData.normalize){
+			vector<Normalize*> normalizeList=obtainNormalizations(data);
+			
+			//cout << "debug:" << endl;
+			int i,j;
+			for (i=0; i<data.size(); i++){
+				for (j=0; j<data[i].size(); j++){
+					data[i][j]=normalizeList[j]->normalize(data[i][j]);
+				}
+			}
+		}
 				
 		pair<vector<vector<float> >, vector<vector<float> > > splitedData= splitData(data, NN->getInput());
 		NN->learn(splitedData.first, splitedData.second,inputData.epochs, inputData.overTraining, inputData.learnRate, inputData.momentum);
@@ -168,6 +183,18 @@ int main(int argc, char** argv) {
 	
 	if (inputData.predict){
 		vector<vector< float> > data=loadFile(inputData.predictFile);	
+		
+		if (inputData.normalize){
+			vector<Normalize*> normalizeList=obtainNormalizations(data);
+			
+			//cout << "debug:" << endl;
+			int i,j;
+			for (i=0; i<data.size(); i++){
+				for (j=0; j<data[i].size(); j++){
+					data[i][j]=normalizeList[j]->normalize(data[i][j]);
+				}
+			}
+		}
 		
 		pair<vector<vector<float> >, vector<vector<float> > > splitedData= splitData(data, NN->getInput());
 		
