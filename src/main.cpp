@@ -102,6 +102,7 @@ int main(int argc, char** argv) {
 				break;
 			case 'n':
 				inputData.normalize=true;
+				break;
             case ':':
 				fprintf(stderr,
 						"Option -%c requires an operand\n", optopt);
@@ -146,6 +147,7 @@ int main(int argc, char** argv) {
     }
 	
 	MultiLayerNN* NN;
+	vector<Normalize*> normalizeList;
 	
 	if (inputData.inew){
 		vector<string> dessign=tokenize(inputData.newDessin, ";,.");
@@ -162,14 +164,17 @@ int main(int argc, char** argv) {
 		vector<vector< float> > data=loadFile(inputData.learnFile);	
 		
 		if (inputData.normalize){
-			vector<Normalize*> normalizeList=obtainNormalizations(data);
+			normalizeList=obtainNormalizations(data);
 			
 			//cout << "debug:" << endl;
 			int i,j;
 			for (i=0; i<data.size(); i++){
+				//cout << i << ":" ;
 				for (j=0; j<data[i].size(); j++){
 					data[i][j]=normalizeList[j]->normalize(data[i][j]);
+				//	cout << data[i][j] << "	";
 				}
+				//cout << endl;
 			}
 		}
 				
@@ -182,37 +187,48 @@ int main(int argc, char** argv) {
 	}
 	
 	if (inputData.predict){
-		vector<vector< float> > data=loadFile(inputData.predictFile);	
-		
-		if (inputData.normalize){
+		vector<vector< float> > data=loadFile(inputData.predictFile);
+		vector<vector< float> > dataNorm(data.size(),vector<float>(data[0].size(),0.0f));
+		//vector<Normalize*> normalizeList;
+		if (inputData.normalize && normalizeList.size()==0){
 			vector<Normalize*> normalizeList=obtainNormalizations(data);
-			
+		} else {
+			dataNorm=data;
+		}
+		if (inputData.normalize){
 			//cout << "debug:" << endl;
 			int i,j;
 			for (i=0; i<data.size(); i++){
 				for (j=0; j<data[i].size(); j++){
-					data[i][j]=normalizeList[j]->normalize(data[i][j]);
+					dataNorm[i][j]=normalizeList[j]->normalize(data[i][j]);
 				}
 			}
 		}
 		
-		pair<vector<vector<float> >, vector<vector<float> > > splitedData= splitData(data, NN->getInput());
+		pair<vector<vector<float> >, vector<vector<float> > > splitedData= splitData(dataNorm, NN->getInput());
 		
 		ofstream writer;
 		writer.open(inputData.writeFile.c_str(), ios::out);
 		int i,j;
+		int input=NN->getInput();
 		for (i=0; i<data.size(); i++){
 			writer << i << ";";
 			vector<float> result=NN->predict(splitedData.first[i]);
 			for (j=0; j<data[i].size(); j++){
 				writer << data[i][j] << ";";
 			}
+		
 			for (j=0; j<result.size(); j++){
-				if (result[j]<0.5f){
+				if (inputData.normalize){
+					writer << normalizeList[input+j]->restore(result[j]) << ";";
+				} else {
+					writer << result[j] << ";";
+				}
+				/*if (result[j]<0.5f){
 					writer << 0;
 				} else {
 					writer << 1;
-				}
+				}*/
 				//debugFile << result[j];
 			}
 			writer << endl;
