@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
 	
 	if (!inputData.dump && ! inputData.predict){
 		errflg++;
-		cerr << "You wish to loose time with nothing? please select -D or -P option, thanks!" << endl;
+		cerr << "Do you wish loose time with nothing? please select -D or -P option, thanks!" << endl;
 	}
 	
     if (errflg) {
